@@ -1,0 +1,116 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum Sentiment {
+  POSITIVE
+  NEUTRAL
+  NEGATIVE
+}
+
+enum Status {
+  NEW
+  IN_REVIEW
+  ACTION_TAKEN
+  RESOLVED
+}
+
+enum Channel {
+  WEB_WIDGET
+  SURVEY
+  EMAIL
+  DIRECT_API
+  CSV_IMPORT
+}
+
+model User {
+  id            String            @id @default(cuid())
+  name          String?
+  email         String            @unique
+  password      String?
+  image         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  workspaces    WorkspaceMember[]
+}
+
+model Workspace {
+  id          String            @id @default(cuid())
+  name        String
+  slug        String            @unique
+  description String?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  members     WorkspaceMember[]
+  feedbacks   Feedback[]
+  apiKeys     ApiKey[]
+  insights    AIInsight[]
+}
+
+model WorkspaceMember {
+  id          String    @id @default(cuid())
+  role        Role      @default(MEMBER)
+  userId      String
+  workspaceId String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+}
+
+model Feedback {
+  id              String    @id @default(cuid())
+  workspaceId     String
+  content         String
+  authorName      String?
+  authorEmail     String?
+  channel         Channel   @default(WEB_WIDGET)
+  rating          Int?      // 1 to 5 stars
+  sentiment       Sentiment @default(NEUTRAL)
+  sentimentScore  Float     @default(0.5) // 0.0 to 1.0
+  topics          String    // JSON stringified array of topics e.g. ["UI/UX", "Bug Report"]
+  keyPhrases      String    // JSON stringified array of key phrases
+  aiResponseDraft String?   @db.Text
+  status          Status    @default(NEW)
+  internalNotes   String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([sentiment])
+  @@index([status])
+  @@index([channel])
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  name        String
+  key         String    @unique
+  workspaceId String
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
+
+model AIInsight {
+  id            String    @id @default(cuid())
+  workspaceId   String
+  title         String
+  summary       String    @db.Text
+  recommendations String  // JSON stringified list of recommendations
+  overallSentiment Float
+  createdAt     DateTime  @default(now())
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+}
