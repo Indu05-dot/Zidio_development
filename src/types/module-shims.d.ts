@@ -8,6 +8,10 @@ declare module 'lucide-react' {
   export type LucideIcon = React.FC<React.SVGProps<SVGSVGElement>>;
 
   export const X: LucideIcon;
+  export const Activity: LucideIcon;
+  export const CircleAlert: LucideIcon;
+  export const Clock3: LucideIcon;
+  export const Radio: LucideIcon;
   export const Sparkles: LucideIcon;
   export const CheckCircle2: LucideIcon;
   export const TrendingUp: LucideIcon;
