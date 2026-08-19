@@ -15,7 +15,7 @@ import { Toast, ToastMessage } from '@/components/Toast';
 import { WidgetBuilderModal } from '@/components/WidgetBuilderModal';
 import type { AIInsightReport, AnalyticsSummary, Channel, FeedbackItem, Sentiment, Status, Workspace } from '@/lib/types';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE ?? 'http://localhost:4000';
+const API_BASE = 'https://zidio-development-backend.onrender.com';
 
 const workspaces: Workspace[] = [
   {
